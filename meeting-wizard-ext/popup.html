@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 400px;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #F5EFE7;
+      color: #1A1410;
+    }
+
+    /* ========== TUTORIAL OVERLAY ========== */
+    .tutorial-overlay {
+      position: fixed;
+      inset: 0;
+      background: #F5EFE7;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .tutorial-overlay.hidden {
+      display: none;
+    }
+
+    .tutorial-slides {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tutorial-slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 28px;
+      text-align: center;
+      opacity: 0;
+      transform: translateX(40px);
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+    }
+
+    .tutorial-slide.active {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+
+    .tutorial-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .tutorial-icon svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .tutorial-icon.blue { background: rgba(13, 127, 255, 0.1); color: #0D7FFF; }
+    .tutorial-icon.red { background: rgba(221, 60, 50, 0.08); color: #DD3C32; }
+    .tutorial-icon.green { background: rgba(21, 128, 61, 0.08); color: #15803D; }
+
+    .tutorial-slide h2 {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-size: 24px;
+      font-weight: 400;
+      color: #1A1410;
+      margin-bottom: 10px;
+      letter-spacing: -0.025em;
+    }
+
+    .tutorial-slide p {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #6B5E54;
+      max-width: 300px;
+    }
+
+    .tutorial-footer {
+      padding: 20px 28px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .tutorial-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .tutorial-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #E8D9D0;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .tutorial-dot.active {
+      background: #0D7FFF;
+      transform: scale(1.2);
+    }
+
+    .tutorial-next {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 20px;
+      background: #0D7FFF;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .tutorial-next:hover { background: #0B6FE0; }
+    .tutorial-next:active { transform: scale(0.97); }
+
+    .tutorial-skip {
+      background: none;
+      border: none;
+      color: #6B5E54;
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      padding: 8px 4px;
+    }
+
+    .tutorial-skip:hover { color: #1A1410; }
+
+    /* ========== MAIN APP ========== */
+    .container {
+      padding: 20px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .header .logo {
+      width: 32px;
+      height: 32px;
+      background: #0D7FFF;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header .logo svg {
+      width: 18px;
+      height: 18px;
+      fill: white;
+    }
+
+    .header h1 {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-size: 22px;
+      font-weight: 400;
+      color: #1A1410;
+      letter-spacing: -0.025em;
+    }
+
+    /* Consent notice */
+    .consent {
+      background: rgba(13, 127, 255, 0.05);
+      border: 1px solid rgba(13, 127, 255, 0.12);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: #0B6FE0;
+      margin-bottom: 16px;
+      line-height: 1.5;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .consent svg {
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* Error */
+    .error {
+      display: none;
+      background: rgba(221, 60, 50, 0.06);
+      border: 1px solid rgba(221, 60, 50, 0.15);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: #DD3C32;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .error.visible { display: block; }
+
+    /* Status card */
+    .status-area {
+      background: #FFFFFF;
+      border: 1px solid rgba(26, 20, 16, 0.08);
+      border-radius: 14px;
+      padding: 28px 24px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #E8D9D0;
+      transition: background 0.2s;
+    }
+
+    .status-dot.recording {
+      background: #DD3C32;
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.4); }
+    }
+
+    .status-text {
+      font-size: 13px;
+      font-weight: 500;
+      color: #6B5E54;
+    }
+
+    .timer {
+      font-size: 36px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: #1A1410;
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 28px;
+      border: none;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn-start {
+      background: #0D7FFF;
+      color: white;
+    }
+
+    .btn-start:hover { background: #0B6FE0; }
+
+    .btn-stop {
+      background: #DD3C32;
+      color: white;
+    }
+
+    .btn-stop:hover { background: #C62828; }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Download area */
+    .download-area {
+      display: none;
+      background: rgba(21, 128, 61, 0.05);
+      border: 1px solid rgba(21, 128, 61, 0.12);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      text-align: center;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .download-area.visible { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .download-area p {
+      font-size: 12px;
+      color: #15803D;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    .btn-download {
+      background: #15803D;
+      color: white;
+      text-decoration: none;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+
+    .btn-download:hover { background: #166534; }
+
+    .btn-download svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* History */
+    .history-section {
+      border-top: 1px solid #E8D9D0;
+      padding-top: 16px;
+    }
+
+    .history-section h2 {
+      font-size: 11px;
+      font-weight: 600;
+      color: #6B5E54;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 10px;
+    }
+
+    .history-list {
+      list-style: none;
+    }
+
+    .history-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(26, 20, 16, 0.05);
+      font-size: 13px;
+    }
+
+    .history-list li:last-child { border-bottom: none; }
+
+    .history-filename {
+      color: #1A1410;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 220px;
+    }
+
+    .history-meta {
+      color: #6B5E54;
+      font-size: 11px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .history-empty {
+      font-size: 13px;
+      color: #C4B5A6;
+      text-align: center;
+      padding: 20px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .history-empty svg {
+      opacity: 0.4;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========== TUTORIAL OVERLAY ========== -->
+  <div id="tutorial" class="tutorial-overlay">
+    <div class="tutorial-slides">
+      <!-- Slide 1: Welcome -->
+      <div class="tutorial-slide active" data-slide="0">
+        <div class="tutorial-icon blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+        </div>
+        <h2>Welcome to Scribed</h2>
+        <p>Record audio from any browser tab — meetings, lectures, webinars — and save it as a downloadable file.</p>
+      </div>
+
+      <!-- Slide 2: How it works -->
+      <div class="tutorial-slide" data-slide="1">
+        <div class="tutorial-icon red">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+        </div>
+        <h2>One-click recording</h2>
+        <p>Navigate to your meeting tab, click the Scribed icon, and hit Start. The audio records in the background — you'll keep hearing everything normally.</p>
+      </div>
+
+      <!-- Slide 3: Save & access -->
+      <div class="tutorial-slide" data-slide="2">
+        <div class="tutorial-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <h2>Download anytime</h2>
+        <p>When you stop recording, download your audio as a .webm file. All your past sessions are saved and listed here for quick reference.</p>
+      </div>
+    </div>
+
+    <div class="tutorial-footer">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <button class="tutorial-skip" id="tutorialSkip">Skip</button>
+        <div class="tutorial-dots">
+          <div class="tutorial-dot active" data-dot="0"></div>
+          <div class="tutorial-dot" data-dot="1"></div>
+          <div class="tutorial-dot" data-dot="2"></div>
+        </div>
+      </div>
+      <button class="tutorial-next" id="tutorialNext">
+        Next
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========== MAIN APP ========== -->
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+      </div>
+      <h1>Scribed</h1>
+    </div>
+
+    <!-- Consent notice -->
+    <div class="consent">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <span>This extension records audio from your active tab. Ensure all participants have given consent.</span>
+    </div>
+
+    <!-- Error message -->
+    <div id="error" class="error"></div>
+
+    <!-- Status area -->
+    <div class="status-area">
+      <div class="status-indicator">
+        <div id="statusDot" class="status-dot"></div>
+        <span id="statusText" class="status-text">Ready to record</span>
+      </div>
+      <div id="timer" class="timer">00:00:00</div>
+      <button id="startBtn" class="btn btn-start">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+        Start Recording
+      </button>
+      <button id="stopBtn" class="btn btn-stop" style="display:none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+        Stop Recording
+      </button>
+    </div>
+
+    <!-- Download area -->
+    <div id="downloadArea" class="download-area">
+      <p id="downloadInfo"></p>
+      <a id="downloadLink" class="btn-download" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download Recording
+      </a>
+    </div>
+
+    <!-- History -->
+    <div class="history-section">
+      <h2>Past Recordings</h2>
+      <ul id="historyList" class="history-list">
+        <li class="history-empty">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          No recordings yet
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

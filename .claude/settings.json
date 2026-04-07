@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git rm:*)"
+    ],
+    "additionalDirectories": [
+      "/Users/khushaalchoithramani/Desktop/work/meeting-wizard-codebase/meeting-wizard"
+    ]
+  }
+}

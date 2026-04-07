@@ -1,0 +1,61 @@
+Meeting: Weekly Product Sync
+Date: March 10, 2026
+Participants: Sarah Chen (PM), Alex Rivera (Engineering Lead), Priya Patel (Design), Marcus Johnson (Backend)
+
+[00:00:12] Sarah Chen: Alright everyone, let's get started. Thanks for joining. First up, I want to get a status update on the new onboarding flow.
+
+[00:00:25] Priya Patel: Sure, I finished the high-fidelity mockups last Friday. I've shared them in Figma. The main change from the wireframes is we're going with a three-step wizard instead of a single long form.
+
+[00:00:45] Alex Rivera: I saw those, they look great. My concern is the animated transitions between steps. Do we have the bandwidth to build those for the MVP?
+
+[00:01:02] Priya Patel: We could simplify the transitions. A basic fade would still feel polished without the complexity of the slide animations.
+
+[00:01:15] Sarah Chen: Let's go with the simplified transitions for now. We can revisit the fancier animations in v2. Alex, what's the engineering timeline looking like?
+
+[00:01:30] Alex Rivera: With the simplified animations, I think we can have it ready in two sprints. Marcus, how's the API side?
+
+[00:01:42] Marcus Johnson: The user registration endpoints are done. I still need to build the email verification flow and the workspace setup API. Should take about a week.
+
+[00:02:00] Sarah Chen: Perfect. So we're looking at roughly three weeks total. That puts us right on track for the April 1st launch.
+
+[00:02:15] Alex Rivera: One thing: we need to decide on the authentication method. Are we going with magic links or traditional email/password?
+
+[00:02:28] Sarah Chen: Good question. What does everyone think?
+
+[00:02:35] Priya Patel: From a UX perspective, magic links are cleaner. No password to remember, fewer form fields.
+
+[00:02:45] Marcus Johnson: Magic links are simpler to implement too. We'd just need the email service integration, which we already have through SendGrid.
+
+[00:02:58] Sarah Chen: Alright, let's go with magic links. We can always add password auth later if users request it.
+
+[00:03:10] Alex Rivera: Agreed. I'll update the tech spec to reflect that.
+
+[00:03:18] Sarah Chen: Next topic, the analytics dashboard. Priya, where are we on the designs?
+
+[00:03:28] Priya Patel: I'm about 60% done. The main charts and KPI cards are designed. I'm still working on the filtering and date range picker. Should have everything ready by end of this week.
+
+[00:03:45] Marcus Johnson: For the backend, I've been evaluating whether to use our own aggregation pipeline or a third-party analytics service. I'm leaning toward building it ourselves since our data model is pretty specific.
+
+[00:04:02] Alex Rivera: I agree. We tried Mixpanel at my last company and ended up migrating away because the custom queries were too limited.
+
+[00:04:15] Sarah Chen: Makes sense. Marcus, can you put together a short tech proposal by Wednesday? Just so we can review the approach before you start building.
+
+[00:04:28] Marcus Johnson: Will do.
+
+[00:04:32] Sarah Chen: Last thing, the customer feedback from the beta. We got 47 responses to the survey. The top three requests are: dark mode, keyboard shortcuts, and CSV export. I think CSV export is the quickest win.
+
+[00:04:50] Alex Rivera: Definitely. I can have a junior dev pick that up. It's mostly frontend work, just formatting the table data and triggering a download.
+
+[00:05:02] Sarah Chen: Great. Let's prioritize CSV export for this sprint, dark mode for next sprint, and keyboard shortcuts for the sprint after.
+
+[00:05:15] Priya Patel: I'll start on the dark mode color palette this week so it's ready when engineering picks it up.
+
+[00:05:25] Sarah Chen: Perfect. Alright, to summarize the action items: Alex updates the tech spec for magic link auth, Marcus writes the analytics tech proposal by Wednesday, Alex assigns CSV export to a junior dev, and Priya prepares the dark mode palette. Anything else?
+
+[00:05:45] Marcus Johnson: One quick thing: the staging environment has been flaky. I'm seeing intermittent database timeouts. I'll investigate today.
+
+[00:05:58] Sarah Chen: Good call. Flag it in Slack if it turns out to be something serious. Alright, that's it. Thanks everyone!
+
+[00:06:05] Alex Rivera: Thanks!
+[00:06:06] Priya Patel: Bye!
+[00:06:07] Marcus Johnson: See you all Thursday.
