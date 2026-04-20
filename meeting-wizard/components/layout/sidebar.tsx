@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   MessageSquareText,
   Settings,
+  BookOpen,
   PanelLeftClose,
   PanelLeft,
 } from "lucide-react";
@@ -14,6 +15,7 @@ import {
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Meetings", href: "/meetings", icon: MessageSquareText },
+  { label: "Docs", href: "/docs", icon: BookOpen },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -41,7 +43,7 @@ export function Sidebar({
       >
         {open && (
           <span className="font-semibold text-lg whitespace-nowrap">
-            Scribed
+            Described
           </span>
         )}
       </div>

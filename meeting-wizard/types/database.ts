@@ -33,7 +33,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-// Simplified database type — we use `any` for the generic param
+// Simplified database type. We use `any` for the generic param
 // and rely on our own query layer types for safety.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Database = any;

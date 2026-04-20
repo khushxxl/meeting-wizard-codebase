@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MeetingMetadataCard } from "@/components/meetings/meeting-metadata-card";
+import { AudioPlayerCard } from "@/components/meetings/audio-player-card";
 import { SummaryTab } from "@/components/meetings/summary-tab";
 import { TranscriptTab } from "@/components/meetings/transcript-tab";
 import { ActionItemsTab } from "@/components/meetings/action-items-tab";
@@ -17,9 +18,11 @@ import { ArrowLeft, FileText } from "lucide-react";
 export function MeetingDetailClient({
   meeting,
   notes,
+  audioSrc,
 }: {
   meeting: Meeting;
   notes: MeetingNote | null;
+  audioSrc: string | null;
 }) {
   const router = useRouter();
 
@@ -46,6 +49,12 @@ export function MeetingDetailClient({
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
+          {audioSrc && (
+            <AudioPlayerCard
+              src={audioSrc}
+              fallbackDuration={meeting.duration_seconds}
+            />
+          )}
           {notes ? (
             <Card>
               <CardContent className="pt-6">

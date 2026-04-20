@@ -17,5 +17,15 @@ export default async function MeetingDetailPage({
 
   const notes = meeting.meeting_notes?.[0] ?? null;
 
-  return <MeetingDetailClient meeting={meeting} notes={notes} />;
+  let audioSrc: string | null = null;
+  if (meeting.audio_url) {
+    const { data } = await supabase.storage
+      .from("recordings")
+      .createSignedUrl(meeting.audio_url, 60 * 60);
+    audioSrc = data?.signedUrl ?? null;
+  }
+
+  return (
+    <MeetingDetailClient meeting={meeting} notes={notes} audioSrc={audioSrc} />
+  );
 }

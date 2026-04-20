@@ -240,7 +240,7 @@ export function BottomDock({
                             Notes generated
                           </p>
                           <p className="text-xs text-green-700 dark:text-green-300">
-                            {result.title} — {result.actionItemsCount} action
+                            {result.title}: {result.actionItemsCount} action
                             items, {result.keyPointsCount} key points
                           </p>
                         </div>

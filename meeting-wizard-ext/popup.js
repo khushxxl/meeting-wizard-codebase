@@ -42,6 +42,89 @@ tutorialSkip.addEventListener("click", dismissTutorial);
 
 initTutorial();
 
+// ========== SETTINGS ==========
+const settingsBtn = document.getElementById("settingsBtn");
+const settingsClose = document.getElementById("settingsClose");
+const settingsOverlay = document.getElementById("settingsOverlay");
+const serverUrlInput = document.getElementById("serverUrlInput");
+const apiKeyInput = document.getElementById("apiKeyInput");
+const settingsSave = document.getElementById("settingsSave");
+const settingsMessage = document.getElementById("settingsMessage");
+const connectionStatus = document.getElementById("connectionStatus");
+
+function normalizeUrl(url) {
+  return (url || "").trim().replace(/\/+$/, "");
+}
+
+async function getConfig() {
+  const { serverUrl = "", apiKey = "" } = await chrome.storage.local.get([
+    "serverUrl",
+    "apiKey",
+  ]);
+  return { serverUrl: normalizeUrl(serverUrl), apiKey };
+}
+
+async function renderConnectionStatus() {
+  const { serverUrl, apiKey } = await getConfig();
+  if (serverUrl && apiKey) {
+    connectionStatus.textContent = `Connected to ${serverUrl}`;
+    connectionStatus.classList.remove("disconnected");
+    connectionStatus.classList.add("connected");
+  } else {
+    connectionStatus.textContent = "Not connected. Add your server URL and API key.";
+    connectionStatus.classList.remove("connected");
+    connectionStatus.classList.add("disconnected");
+  }
+}
+
+async function loadSettings() {
+  const { serverUrl, apiKey } = await getConfig();
+  serverUrlInput.value = serverUrl;
+  apiKeyInput.value = apiKey;
+  await renderConnectionStatus();
+}
+
+settingsBtn.addEventListener("click", async () => {
+  await loadSettings();
+  settingsOverlay.classList.remove("hidden");
+});
+
+settingsClose.addEventListener("click", () => {
+  settingsOverlay.classList.add("hidden");
+  settingsMessage.textContent = "";
+});
+
+settingsSave.addEventListener("click", async () => {
+  const serverUrl = normalizeUrl(serverUrlInput.value);
+  const apiKey = apiKeyInput.value.trim();
+
+  if (!serverUrl || !apiKey) {
+    settingsMessage.textContent = "Server URL and API key are both required.";
+    return;
+  }
+
+  settingsSave.disabled = true;
+  settingsMessage.textContent = "Testing connection...";
+
+  try {
+    // POST with empty body: valid key -> 400 (missing audio), bad key -> 401.
+    const res = await fetch(`${serverUrl}/api/extension/upload`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}` },
+      body: new FormData(),
+    });
+    if (res.status === 401) throw new Error("Invalid API key");
+    if (res.status !== 400) throw new Error(`Unexpected HTTP ${res.status}`);
+    await chrome.storage.local.set({ serverUrl, apiKey });
+    settingsMessage.textContent = "Saved. Connection verified.";
+    await renderConnectionStatus();
+  } catch (err) {
+    settingsMessage.textContent = `Connection failed: ${err.message}`;
+  } finally {
+    settingsSave.disabled = false;
+  }
+});
+
 // ========== MAIN APP ==========
 const startBtn = document.getElementById("startBtn");
 const stopBtn = document.getElementById("stopBtn");
@@ -51,18 +134,28 @@ const timerEl = document.getElementById("timer");
 const downloadArea = document.getElementById("downloadArea");
 const downloadInfo = document.getElementById("downloadInfo");
 const downloadLink = document.getElementById("downloadLink");
+const uploadBtn = document.getElementById("uploadBtn");
+const uploadBtnLabel = document.getElementById("uploadBtnLabel");
+const uploadMeta = document.getElementById("uploadMeta");
 const errorEl = document.getElementById("error");
 const historyList = document.getElementById("historyList");
+const includeMicToggle = document.getElementById("includeMicToggle");
 
 let timerInterval = null;
+let currentRecording = null; // { dataUrl, filename, duration, recordedAt }
 
-// Initialize popup state
 async function init() {
   const response = await chrome.runtime.sendMessage({ action: "getStatus" });
   if (response && response.recording) {
     showRecordingState(response.startTime);
   }
+  const { includeMic = true } = await chrome.storage.local.get("includeMic");
+  includeMicToggle.checked = includeMic;
+  includeMicToggle.addEventListener("change", () => {
+    chrome.storage.local.set({ includeMic: includeMicToggle.checked });
+  });
   loadHistory();
+  await renderConnectionStatus();
 }
 
 function formatTime(seconds) {
@@ -111,6 +204,13 @@ function showIdleState() {
   clearInterval(timerInterval);
 }
 
+function resetUploadButton() {
+  uploadBtn.disabled = false;
+  uploadBtn.classList.remove("success");
+  uploadBtnLabel.textContent = "Upload to Described";
+  uploadMeta.textContent = "";
+}
+
 async function loadHistory() {
   const { sessions = [] } = await chrome.storage.local.get("sessions");
 
@@ -128,21 +228,21 @@ async function loadHistory() {
       day: "numeric",
       year: "numeric"
     });
+    const statusLabel = session.uploaded ? " · uploaded" : "";
     li.innerHTML = `
       <span class="history-filename" title="${session.filename}">${session.filename}</span>
-      <span class="history-meta">${dateStr} &middot; ${formatDuration(session.duration)}</span>
+      <span class="history-meta">${dateStr} &middot; ${formatDuration(session.duration)}${statusLabel}</span>
     `;
     historyList.appendChild(li);
   });
 }
 
-// Start recording — popup obtains the stream ID (user gesture lives here)
+// Start recording. Popup obtains the stream ID (user gesture lives here)
 startBtn.addEventListener("click", async () => {
   startBtn.disabled = true;
   errorEl.classList.remove("visible");
 
   try {
-    // 1. Get active tab
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab) {
       showError("No active tab found.");
@@ -150,19 +250,36 @@ startBtn.addEventListener("click", async () => {
       return;
     }
 
-    // 2. Get stream ID from the popup context (has user gesture)
+    const includeMic = includeMicToggle.checked;
+
+    // Mic prompts require a user gesture. Request it here (popup has the gesture),
+    // then release immediately. Offscreen will re-acquire it silently.
+    if (includeMic) {
+      try {
+        const tmp = await navigator.mediaDevices.getUserMedia({ audio: true });
+        tmp.getTracks().forEach(t => t.stop());
+      } catch (err) {
+        showError("Microphone blocked. Enable it for this extension or uncheck 'Include my microphone'.");
+        startBtn.disabled = false;
+        return;
+      }
+    }
+
     const streamId = await chrome.tabCapture.getMediaStreamId({
       targetTabId: tab.id
     });
 
-    // 3. Send stream ID to background to set up offscreen recording
     const response = await chrome.runtime.sendMessage({
       action: "startRecording",
-      streamId
+      streamId,
+      includeMic
     });
 
     if (response && response.success) {
       showRecordingState(Date.now());
+      if (includeMic && response.micIncluded === false) {
+        showError(`Recording tab only. Mic failed: ${response.micError || "unknown"}`);
+      }
     } else {
       showError(response?.error || "Failed to start recording.");
       startBtn.disabled = false;
@@ -187,15 +304,86 @@ stopBtn.addEventListener("click", async () => {
     showIdleState();
     statusText.textContent = "Recording saved";
 
+    currentRecording = {
+      dataUrl: response.dataUrl,
+      filename: response.filename,
+      duration: response.duration,
+      recordedAt: new Date().toISOString(),
+    };
+
     downloadInfo.textContent = `${response.filename} (${formatDuration(response.duration)})`;
     downloadLink.href = response.dataUrl;
     downloadLink.download = response.filename;
-    downloadArea.classList.add("visible");
 
+    resetUploadButton();
+    downloadArea.classList.add("visible");
     loadHistory();
   } else {
     showError(response?.error || "Failed to stop recording.");
     showIdleState();
+  }
+});
+
+// Upload to Described
+uploadBtn.addEventListener("click", async () => {
+  if (!currentRecording) return;
+
+  const { serverUrl, apiKey } = await getConfig();
+  if (!serverUrl || !apiKey) {
+    showError("Set your server URL and API key in settings first.");
+    settingsOverlay.classList.remove("hidden");
+    await loadSettings();
+    return;
+  }
+
+  uploadBtn.disabled = true;
+  uploadBtnLabel.textContent = "Uploading...";
+  uploadMeta.textContent = "This can take a minute for longer recordings.";
+
+  try {
+    const blob = await (await fetch(currentRecording.dataUrl)).blob();
+
+    const form = new FormData();
+    form.append("audio", blob, currentRecording.filename);
+    form.append("duration_seconds", String(currentRecording.duration));
+    form.append("recorded_at", currentRecording.recordedAt);
+
+    const res = await fetch(`${serverUrl}/api/extension/upload`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}` },
+      body: form,
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(data.error || `HTTP ${res.status}`);
+    }
+
+    uploadBtn.classList.add("success");
+    uploadBtnLabel.textContent = "Uploaded";
+    uploadMeta.textContent = "";
+    const link = document.createElement("a");
+    link.href = `${serverUrl}/meetings/${encodeURIComponent(data.meetingId)}`;
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.style.color = "#0D7FFF";
+    link.textContent = "Open meeting →";
+    uploadMeta.appendChild(link);
+
+    // Mark the most recent session as uploaded
+    const { sessions = [] } = await chrome.storage.local.get("sessions");
+    if (sessions[0]) {
+      sessions[0].uploaded = true;
+      sessions[0].meetingId = data.meetingId;
+      await chrome.storage.local.set({ sessions });
+      loadHistory();
+    }
+  } catch (err) {
+    uploadBtn.disabled = false;
+    uploadBtnLabel.textContent = "Upload to Described";
+    uploadMeta.textContent = "";
+    showError(`Upload failed: ${err.message}`);
   }
 });
 

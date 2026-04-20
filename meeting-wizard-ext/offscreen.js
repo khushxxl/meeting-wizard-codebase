@@ -1,10 +1,12 @@
 let mediaRecorder = null;
 let recordedChunks = [];
 let audioContext = null;
+let tabStream = null;
+let micStream = null;
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "offscreen-start") {
-    startRecording(message.streamId, sendResponse);
+    startRecording(message.streamId, message.includeMic !== false, sendResponse);
     return true;
   }
 
@@ -14,14 +16,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-async function startRecording(streamId, sendResponse) {
+async function startRecording(streamId, includeMic, sendResponse) {
   if (!streamId) {
     sendResponse({ success: false, error: "No stream ID provided." });
     return;
   }
 
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({
+    tabStream = await navigator.mediaDevices.getUserMedia({
       audio: {
         mandatory: {
           chromeMediaSource: "tab",
@@ -30,20 +32,39 @@ async function startRecording(streamId, sendResponse) {
       }
     });
 
+    let micError = null;
+    if (includeMic) {
+      try {
+        micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch (err) {
+        micError = err.message || "Microphone access denied";
+        micStream = null;
+      }
+    }
+
     recordedChunks = [];
 
-    // Pipe audio back to speakers so the user can still hear it
     audioContext = new AudioContext();
-    const source = audioContext.createMediaStreamSource(stream);
-    source.connect(audioContext.destination);
+    const destination = audioContext.createMediaStreamDestination();
 
-    // Try audio/webm with opus, fall back to plain audio/webm
+    // Mix tab audio into the recording AND pipe it back to speakers
+    // so the user still hears the meeting.
+    const tabSource = audioContext.createMediaStreamSource(tabStream);
+    tabSource.connect(destination);
+    tabSource.connect(audioContext.destination);
+
+    // Mix mic audio into the recording, but NOT to speakers (would cause feedback).
+    if (micStream) {
+      const micSource = audioContext.createMediaStreamSource(micStream);
+      micSource.connect(destination);
+    }
+
     let mimeType = "audio/webm;codecs=opus";
     if (!MediaRecorder.isTypeSupported(mimeType)) {
       mimeType = "audio/webm";
     }
 
-    mediaRecorder = new MediaRecorder(stream, { mimeType });
+    mediaRecorder = new MediaRecorder(destination.stream, { mimeType });
 
     mediaRecorder.ondataavailable = (event) => {
       if (event.data && event.data.size > 0) {
@@ -56,10 +77,30 @@ async function startRecording(streamId, sendResponse) {
     };
 
     mediaRecorder.start(1000);
-    sendResponse({ success: true });
+    sendResponse({
+      success: true,
+      micIncluded: Boolean(micStream),
+      micError
+    });
   } catch (err) {
     console.error("Offscreen startRecording error:", err);
+    cleanupStreams();
     sendResponse({ success: false, error: err.message });
+  }
+}
+
+function cleanupStreams() {
+  if (tabStream) {
+    tabStream.getTracks().forEach(t => t.stop());
+    tabStream = null;
+  }
+  if (micStream) {
+    micStream.getTracks().forEach(t => t.stop());
+    micStream = null;
+  }
+  if (audioContext) {
+    audioContext.close();
+    audioContext = null;
   }
 }
 
@@ -73,14 +114,7 @@ function stopRecording(sendResponse) {
     const blob = new Blob(recordedChunks, { type: "audio/webm" });
     recordedChunks = [];
 
-    // Stop all tracks and close audio context
-    if (mediaRecorder.stream) {
-      mediaRecorder.stream.getTracks().forEach(t => t.stop());
-    }
-    if (audioContext) {
-      audioContext.close();
-      audioContext = null;
-    }
+    cleanupStreams();
     mediaRecorder = null;
 
     const reader = new FileReader();

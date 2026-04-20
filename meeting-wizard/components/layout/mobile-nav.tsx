@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, MessageSquareText, Settings, X } from "lucide-react";
+import { LayoutDashboard, MessageSquareText, Settings, BookOpen, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Meetings", href: "/meetings", icon: MessageSquareText },
+  { label: "Docs", href: "/docs", icon: BookOpen },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -29,7 +30,7 @@ export function MobileNav({
       <div className="fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border shadow-lg">
         <div className="flex items-center justify-between px-6 py-5 border-b border-border">
           <div className="flex items-center gap-2">
-            <span className="font-semibold">Scribed</span>
+            <span className="font-semibold">Described</span>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-4 w-4" />

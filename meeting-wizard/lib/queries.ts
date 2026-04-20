@@ -14,6 +14,7 @@ export interface Meeting {
   google_meet_link: string;
   status: MeetingStatus;
   participants: Participant[];
+  audio_url: string | null;
   created_at: string;
   updated_at: string;
 }

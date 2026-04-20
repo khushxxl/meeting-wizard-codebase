@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { ProfileForm } from "@/components/settings/profile-form";
 import { IntegrationsCard } from "@/components/settings/integrations-card";
 import { PreferencesForm } from "@/components/settings/preferences-form";
+import { ApiKeysCard } from "@/components/settings/api-keys-card";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -32,6 +33,7 @@ export default async function SettingsPage() {
         calendarConnected={profile?.google_calendar_connected ?? false}
         userId={user.id}
       />
+      <ApiKeysCard />
       <PreferencesForm
         userId={user.id}
         autoJoinEnabled={profile?.auto_join_enabled ?? true}

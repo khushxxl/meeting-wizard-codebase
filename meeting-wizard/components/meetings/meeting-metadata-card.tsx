@@ -3,11 +3,9 @@ import { Separator } from "@/components/ui/separator";
 import { MeetingStatusBadge } from "./meeting-status-badge";
 import type { Meeting } from "@/lib/queries";
 import { format } from "date-fns";
-import { Calendar, Clock, Users, Video } from "lucide-react";
+import { Calendar, Clock, Video } from "lucide-react";
 
 export function MeetingMetadataCard({ meeting }: { meeting: Meeting }) {
-  const participants = meeting.participants ?? [];
-
   return (
     <Card>
       <CardHeader>
@@ -39,36 +37,6 @@ export function MeetingMetadataCard({ meeting }: { meeting: Meeting }) {
             </p>
           </div>
         )}
-        <Separator />
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Users className="h-4 w-4 text-muted-foreground" />
-            <p className="text-sm font-medium">
-              Participants ({participants.length})
-            </p>
-          </div>
-          {participants.length > 0 ? (
-            <div className="space-y-1.5">
-              {participants.map((p) => (
-                <div key={p.email} className="flex items-center gap-2">
-                  <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-[10px] font-medium text-primary">
-                      {p.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </span>
-                  </div>
-                  <span className="text-sm text-muted-foreground">
-                    {p.name}
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">No participants</p>
-          )}
-        </div>
         <Separator />
         <div>
           <p className="text-xs text-muted-foreground mb-2">Status</p>

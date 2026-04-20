@@ -18,7 +18,7 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Scribed - AI Meeting Notes",
+  title: "Described - AI Meeting Notes",
   description:
     "The most convenient AI notetaker for modern teams. Automatic transcription, summaries, and action items.",
 };

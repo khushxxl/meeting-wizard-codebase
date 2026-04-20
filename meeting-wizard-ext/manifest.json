@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Scribed",
+  "name": "Described",
   "version": "1.0.0",
   "description": "Record meeting audio from your active browser tab and save it as a downloadable file.",
   "permissions": [

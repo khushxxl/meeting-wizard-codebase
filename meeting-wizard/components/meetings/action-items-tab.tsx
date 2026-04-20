@@ -21,7 +21,7 @@ export function ActionItemsTab({
     );
     setItems(updated);
 
-    // Optimistic update — persist to DB
+    // Optimistic update, persist to DB
     const supabase = createClient();
     await supabase
       .from("meeting_notes")

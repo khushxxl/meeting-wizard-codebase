@@ -16,10 +16,7 @@ export function TranscriptTab({ transcript }: { transcript: TranscriptEntry[] })
           <span className="text-xs text-muted-foreground font-mono shrink-0 pt-0.5 w-16">
             [{entry.timestamp}]
           </span>
-          <div>
-            <span className="text-sm font-medium">{entry.speaker}: </span>
-            <span className="text-sm text-muted-foreground">{entry.text}</span>
-          </div>
+          <span className="text-sm text-muted-foreground">{entry.text}</span>
         </div>
       ))}
     </div>

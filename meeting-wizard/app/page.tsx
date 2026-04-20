@@ -28,7 +28,7 @@ export default function LandingPage() {
       <div className="absolute inset-0 bg-black/80" />
       <header className="relative z-10 flex items-center justify-between px-6 py-4 max-w-6xl mx-auto w-full">
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-lg text-white">Scribed</span>
+          <span className="font-semibold text-lg text-white">Described</span>
         </div>
         <Button
           variant="outline"

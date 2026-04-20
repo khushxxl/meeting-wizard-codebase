@@ -3,7 +3,7 @@ let recordingStartTime = null;
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "startRecording") {
-    handleStartRecording(message.streamId, sendResponse);
+    handleStartRecording(message.streamId, message.includeMic !== false, sendResponse);
     return true;
   }
 
@@ -31,7 +31,7 @@ async function ensureOffscreenDocument() {
   });
 }
 
-async function handleStartRecording(streamId, sendResponse) {
+async function handleStartRecording(streamId, includeMic, sendResponse) {
   if (recording) {
     sendResponse({ success: false, error: "Recording already in progress." });
     return;
@@ -45,13 +45,18 @@ async function handleStartRecording(streamId, sendResponse) {
 
     const response = await chrome.runtime.sendMessage({
       action: "offscreen-start",
-      streamId
+      streamId,
+      includeMic
     });
 
     if (response && response.success) {
       recording = true;
       recordingStartTime = Date.now();
-      sendResponse({ success: true });
+      sendResponse({
+        success: true,
+        micIncluded: response.micIncluded,
+        micError: response.micError
+      });
     } else {
       sendResponse({ success: false, error: response?.error || "Offscreen recording failed." });
     }
