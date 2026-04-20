@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MeetingMetadataCard } from "@/components/meetings/meeting-metadata-card";
 import { AudioPlayerCard } from "@/components/meetings/audio-player-card";
+import { ShareByEmailCard } from "@/components/meetings/share-by-email-card";
 import { SummaryTab } from "@/components/meetings/summary-tab";
 import { TranscriptTab } from "@/components/meetings/transcript-tab";
 import { ActionItemsTab } from "@/components/meetings/action-items-tab";
@@ -110,8 +111,9 @@ export function MeetingDetailClient({
             </Card>
           )}
         </div>
-        <div>
+        <div className="space-y-4">
           <MeetingMetadataCard meeting={meeting} />
+          <ShareByEmailCard meetingTitle={meeting.title} />
         </div>
       </div>
     </div>

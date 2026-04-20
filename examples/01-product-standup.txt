@@ -1,0 +1,32 @@
+Product Standup — April 14, 2026
+Attendees: Maya Chen, Diego Alvarez, Priya Shah, Tom Whitaker
+
+[00:00:00] Maya Chen: Morning everyone. Let's keep this to fifteen minutes. Diego, you're up first.
+
+[00:00:08] Diego Alvarez: So I wrapped the onboarding redesign yesterday. QA found two blockers, both around the calendar permission step. First one is that users who deny calendar access get stuck on a blank screen. Second one is that the "skip for now" link sometimes fires twice and creates duplicate workspace rows.
+
+[00:00:34] Maya Chen: Both sound bad. Can you land fixes before the end of the week?
+
+[00:00:39] Diego Alvarez: Yes, I can have both fixed by Thursday. Priya, I'll need you to retest the duplicate workspace one because the repro needs a fresh account.
+
+[00:00:52] Priya Shah: Happy to. Send me the branch when it's up. On my end, I finished the Stripe webhook refactor. Caught one bug where we were double-counting subscription renewals. Rolled out behind a flag yesterday, no issues. I want to remove the flag next Monday.
+
+[00:01:15] Maya Chen: Good. Any chance that regression explains the MRR dashboard jump last Friday?
+
+[00:01:22] Priya Shah: Very likely. I'll cross-check with the finance view today.
+
+[00:01:29] Maya Chen: Tom?
+
+[00:01:31] Tom Whitaker: Working on the new export format. I'm blocked on design for the PDF cover page. Need the Described logo lockup from brand. Also, the Whisper pricing increase kicks in May 1st. Estimating about a forty percent cost bump at current volumes. We should talk about whether to switch to a different provider or pass the cost through.
+
+[00:02:04] Maya Chen: Let's put that on Friday's planning. Can you draft a one-pager with options before then?
+
+[00:02:11] Tom Whitaker: Sure, I'll have it in your inbox Thursday night.
+
+[00:02:16] Maya Chen: Last thing from me. Legal approved the new terms of service. We need to push the banner to all users by April 30th, otherwise we're out of compliance with the new EU rules. Diego, can you own the in-app banner? Priya, can you own the email blast?
+
+[00:02:36] Diego Alvarez: Got it.
+
+[00:02:37] Priya Shah: On it. I'll use the existing transactional template.
+
+[00:02:42] Maya Chen: Great. Fifteen minutes, we're done. Thanks team.

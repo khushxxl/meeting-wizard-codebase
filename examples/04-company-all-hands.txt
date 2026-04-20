@@ -1,0 +1,48 @@
+Company All-Hands Q2 Kickoff — April 17, 2026
+Attendees: Kenji Tanaka (CEO), Farah Mansour (Head of Product), Elena Costa (Head of Sales), David Bloom (Head of Engineering), plus team
+
+[00:00:00] Kenji Tanaka: Good morning everyone. Thanks for joining. We have about thirty minutes, I'll cover quarter results, Q2 priorities, and then we'll do questions. Farah, Elena, David will each take five minutes on their areas.
+
+[00:00:22] Kenji Tanaka: Starting with the numbers. Q1 closed at two point four million ARR, up from one point six million at the end of last year. That's a fifty percent quarter over quarter, which is the highest we've had. Gross margin is steady at seventy-two percent. Burn came in at three hundred and twenty thousand a month, a little under plan.
+
+[00:00:55] Kenji Tanaka: Bigger picture. The board reviewed our runway and we have fourteen months at current burn, eighteen if we hit the Q2 revenue plan. We are not raising this year. That means Q2 and Q3 execution matters more than usual.
+
+[00:01:17] Kenji Tanaka: Q2 priorities are three things. First, launch the Teams plan publicly. Second, ship Zoom native integration. Third, hire two more engineers and one enterprise AE. Farah?
+
+[00:01:34] Farah Mansour: Thanks Kenji. On product, our big bet this quarter is the Teams plan. It's been in private beta with twelve customers since February. Retention is strong, ninety-one percent, and NPS is sixty-two. We'll open it to all customers on May 15th. The work left is the admin dashboard, billing consolidation, and the SSO integration.
+
+[00:02:05] Farah Mansour: Second focus is Zoom native. We have the SDK access approved last week. Target GA is end of June. This unlocks a big swath of customers we've been losing to competitors.
+
+[00:02:20] Farah Mansour: Third, we're cleaning up the free tier. Too generous right now, costing us real money on Whisper bills. Moving to thirty minutes of recording a month on free, down from two hours. Ben is running the migration plan.
+
+[00:02:38] Farah Mansour: Elena, over to you.
+
+[00:02:41] Elena Costa: Thanks. Sales update. Q1 we closed eighteen new logos, which is the best quarter we've had. Pipeline for Q2 is healthy, about four point one million in qualified opportunities. Biggest risk is the Zoom integration gap. We have three deals in the pipeline that are explicitly waiting on that, total value about four hundred thousand.
+
+[00:03:10] Elena Costa: On hiring, we need one more enterprise AE to cover the east coast. Marcus is solid on west coast but he's running at capacity. I've started the search, hoping to have someone in seat by June.
+
+[00:03:26] Elena Costa: Last thing. I want to call out the product team. Every deal review I've run this quarter, customers mention the AI notes quality. That's not marketing, that's word of mouth. Keep it coming. David?
+
+[00:03:41] David Bloom: Thanks Elena. Engineering update. We shipped forty-two pull requests last week, no production incidents. Uptime was ninety-nine point nine eight percent for the quarter.
+
+[00:03:56] David Bloom: The biggest engineering bet in Q2 is reducing Whisper cost. Tom is leading an eval of Deepgram and AssemblyAI. We'll pick a direction by end of April. We think we can cut transcription costs forty percent without quality loss.
+
+[00:04:18] David Bloom: Hiring. We have offers out to two senior engineers, one backend one frontend. Expecting both to accept this week. That puts us at thirteen engineers by end of Q2 if things go to plan.
+
+[00:04:33] David Bloom: Last thing. We're pulling forward the security audit from Q3 to Q2. Several enterprise deals need SOC 2 Type 1 before they'll sign. Farah and I are working with Vanta to accelerate. Target completion is July 1st.
+
+[00:04:50] Kenji Tanaka: Thanks David. Before questions, I want to acknowledge that this is going to be a heavier quarter than Q1. A lot is on the line. We're also going to do our first company offsite in June, three days in Lisbon. Travel and accommodation covered. Details will go out next week.
+
+[00:05:12] Kenji Tanaka: Okay, questions. I see hands. Amir, go ahead.
+
+[00:05:16] Amir Khalil: Thanks Kenji. Question on the SOC 2 push. What does it require from engineering teams outside the security folks?
+
+[00:05:24] David Bloom: Fair question. Mostly documentation work. Each team will need to write runbooks for their services, and we're standardizing on a single code review policy. I'll send a one-pager with specifics this week. Minimal new work for most of you, more a formalization of what we already do.
+
+[00:05:44] Kenji Tanaka: Next. Yui.
+
+[00:05:46] Yui Nakamura: Are we changing the commission structure for the new AE?
+
+[00:05:50] Elena Costa: Same structure as existing AEs. Eight percent on new logo, three percent on expansion, accelerators above quota.
+
+[00:05:58] Kenji Tanaka: Any last ones? Okay, that's a wrap. Thanks everyone. Let's go ship a great Q2.

@@ -7,7 +7,6 @@ import {
   LayoutDashboard,
   MessageSquareText,
   Settings,
-  BookOpen,
   PanelLeftClose,
   PanelLeft,
 } from "lucide-react";
@@ -15,23 +14,25 @@ import {
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Meetings", href: "/meetings", icon: MessageSquareText },
-  { label: "Docs", href: "/docs", icon: BookOpen },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
 export function Sidebar({
   open,
   onToggle,
+  animate = true,
 }: {
   open: boolean;
   onToggle: () => void;
+  animate?: boolean;
 }) {
   const pathname = usePathname();
 
   return (
     <aside
       className={cn(
-        "hidden md:flex md:flex-col md:fixed md:inset-y-0 border-r border-border bg-card transition-[width] duration-200",
+        "hidden md:flex md:flex-col md:fixed md:inset-y-0 border-r border-border bg-card",
+        animate && "transition-[width] duration-200",
         open ? "md:w-60" : "md:w-16",
       )}
     >

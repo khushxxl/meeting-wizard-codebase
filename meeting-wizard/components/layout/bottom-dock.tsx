@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { ChatDrawer, type ChatMessage } from "@/components/chat/chat-drawer";
 
 interface ProcessResult {
   meetingId: string;
@@ -39,8 +40,27 @@ export function BottomDock({
   const [result, setResult] = useState<ProcessResult | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [meetLink, setMeetLink] = useState("");
+  const [aiQuery, setAiQuery] = useState("");
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [pendingChatMessage, setPendingChatMessage] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  const openChatWithQuery = (initial: string) => {
+    setPendingChatMessage(initial);
+    setChatOpen(true);
+    setActivePanel(null);
+    setAiQuery("");
+  };
+
+  const handleAskAiClick = () => {
+    if (chatOpen) {
+      setChatOpen(false);
+      return;
+    }
+    togglePanel("ai");
+  };
 
   const togglePanel = (panel: string) => {
     setActivePanel((prev) => (prev === panel ? null : panel));
@@ -308,16 +328,26 @@ export function BottomDock({
           )}
 
           {activePanel === "ai" && (
-            <div className="space-y-3">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!aiQuery.trim()) return;
+                openChatWithQuery(aiQuery.trim());
+              }}
+              className="space-y-3"
+            >
               <input
+                autoFocus
                 type="text"
+                value={aiQuery}
+                onChange={(e) => setAiQuery(e.target.value)}
                 placeholder="Ask about your meetings..."
                 className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               />
               <p className="text-xs text-muted-foreground text-center">
-                e.g. &quot;What were the action items from last week?&quot;
+                Press Enter to open chat. e.g. &quot;What were the action items from last week?&quot;
               </p>
-            </div>
+            </form>
           )}
         </div>
       )}
@@ -341,10 +371,18 @@ export function BottomDock({
         <DockItem
           icon={Sparkles}
           label="Ask AI"
-          active={activePanel === "ai"}
-          onClick={() => togglePanel("ai")}
+          active={activePanel === "ai" || chatOpen}
+          onClick={handleAskAiClick}
         />
       </div>
+      <ChatDrawer
+        open={chatOpen}
+        onClose={() => setChatOpen(false)}
+        messages={chatMessages}
+        setMessages={setChatMessages}
+        pendingMessage={pendingChatMessage}
+        onPendingConsumed={() => setPendingChatMessage(null)}
+      />
     </div>
   );
 }

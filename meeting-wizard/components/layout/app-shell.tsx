@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Sidebar } from "./sidebar";
 import { Header } from "./header";
 import { MobileNav } from "./mobile-nav";
 import { BottomDock } from "./bottom-dock";
 import { cn } from "@/lib/utils";
+
+const SIDEBAR_KEY = "described:sidebar-open";
 
 export interface UserInfo {
   id: string;
@@ -23,14 +25,25 @@ export function AppShell({
 }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(SIDEBAR_KEY);
+    if (stored !== null) setSidebarOpen(stored === "1");
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (hydrated) localStorage.setItem(SIDEBAR_KEY, sidebarOpen ? "1" : "0");
+  }, [sidebarOpen, hydrated]);
 
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar open={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
+      <Sidebar open={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} animate={hydrated} />
       <MobileNav open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
       <div
         className={cn(
-          "transition-[padding] duration-200",
+          hydrated && "transition-[padding] duration-200",
           sidebarOpen ? "md:pl-60" : "md:pl-16"
         )}
       >
