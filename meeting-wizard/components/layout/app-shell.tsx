@@ -1,10 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Sidebar } from "./sidebar";
 import { Header } from "./header";
 import { MobileNav } from "./mobile-nav";
 import { BottomDock } from "./bottom-dock";
+import {
+  ProductTour,
+  DASHBOARD_TOUR,
+  MEETINGS_TOUR,
+} from "@/components/onboarding/product-tour";
 import { cn } from "@/lib/utils";
 
 const SIDEBAR_KEY = "described:sidebar-open";
@@ -23,6 +29,7 @@ export function AppShell({
   children: React.ReactNode;
   user: UserInfo;
 }) {
+  const pathname = usePathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [hydrated, setHydrated] = useState(false);
@@ -51,6 +58,12 @@ export function AppShell({
         <main className="p-6 pb-24">{children}</main>
       </div>
       <BottomDock sidebarOpen={sidebarOpen} userId={user.id} />
+      {pathname === "/dashboard" && (
+        <ProductTour tourId="dashboard" steps={DASHBOARD_TOUR} />
+      )}
+      {pathname === "/meetings" && (
+        <ProductTour tourId="meetings" steps={MEETINGS_TOUR} />
+      )}
     </div>
   );
 }

@@ -123,11 +123,13 @@ export function BottomDock({
 
   return (
     <div
-      className="fixed bottom-6 z-50 flex flex-col items-center gap-2"
-      style={{
-        left: `calc((100% + ${sidebarOpen ? "240px" : "64px"}) / 2)`,
-        transform: "translateX(-50%)",
-      }}
+      className="fixed bottom-6 z-50 flex flex-col items-center gap-2 left-1/2 md:left-[var(--dock-left)]"
+      style={
+        {
+          transform: "translateX(-50%)",
+          "--dock-left": `calc((100% + ${sidebarOpen ? "240px" : "64px"}) / 2)`,
+        } as React.CSSProperties
+      }
     >
       {/* Expanded panel */}
       {activePanel && (
@@ -353,7 +355,10 @@ export function BottomDock({
       )}
 
       {/* Dock bar */}
-      <div className="flex items-center gap-0 bg-card/90 backdrop-blur-xl border border-border rounded-full shadow-lg px-2 py-1.5">
+      <div
+        data-tour-id="bottom-dock"
+        className="flex items-center gap-0 bg-card/90 backdrop-blur-xl border border-border rounded-full shadow-lg px-2 py-1.5"
+      >
         <DockItem
           icon={Upload}
           label="Upload"
@@ -401,8 +406,9 @@ function DockItem({
   return (
     <button
       onClick={onClick}
+      title={label}
       className={cn(
-        "flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all",
+        "flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap",
         active
           ? "bg-primary text-primary-foreground"
           : "text-muted-foreground hover:text-foreground hover:bg-accent"
@@ -416,7 +422,7 @@ function DockItem({
       >
         <Icon className="h-3.5 w-3.5" />
       </div>
-      {label}
+      <span className="hidden sm:inline">{label}</span>
     </button>
   );
 }

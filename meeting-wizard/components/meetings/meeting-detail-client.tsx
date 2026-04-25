@@ -113,7 +113,10 @@ export function MeetingDetailClient({
         </div>
         <div className="space-y-4">
           <MeetingMetadataCard meeting={meeting} />
-          <ShareByEmailCard meetingTitle={meeting.title} />
+          <ShareByEmailCard
+            meetingId={meeting.id}
+            meetingTitle={meeting.title}
+          />
         </div>
       </div>
     </div>

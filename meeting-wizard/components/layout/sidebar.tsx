@@ -30,6 +30,7 @@ export function Sidebar({
 
   return (
     <aside
+      data-tour-id="sidebar"
       className={cn(
         "hidden md:flex md:flex-col md:fixed md:inset-y-0 border-r border-border bg-card",
         animate && "transition-[width] duration-200",
@@ -57,6 +58,7 @@ export function Sidebar({
               key={item.href}
               href={item.href}
               title={item.label}
+              data-tour-id={item.href === "/settings" ? "nav-settings" : undefined}
               className={cn(
                 "flex items-center rounded-lg text-sm font-medium transition-colors",
                 open ? "gap-3 px-3 py-2.5" : "justify-center px-0 py-2.5",

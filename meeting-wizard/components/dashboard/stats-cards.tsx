@@ -19,7 +19,7 @@ export function StatsCards({ stats }: { stats: Stats }) {
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div data-tour-id="stats-cards" className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {cards.map((card, i) => {
         const Icon = icons[i];
         return (

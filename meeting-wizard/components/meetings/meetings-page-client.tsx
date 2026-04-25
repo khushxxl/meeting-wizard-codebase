@@ -18,7 +18,10 @@ export function MeetingsPageClient({ meetings }: { meetings: Meeting[] }) {
         title="Meetings"
         description="All your meetings and notes in one place."
         action={
-          <div className="flex items-center gap-1 bg-muted p-1 rounded-lg">
+          <div
+            data-tour-id="meetings-view-toggle"
+            className="flex items-center gap-1 bg-muted p-1 rounded-lg"
+          >
             <Button
               variant="ghost"
               size="sm"
@@ -50,11 +53,13 @@ export function MeetingsPageClient({ meetings }: { meetings: Meeting[] }) {
           </div>
         }
       />
-      {view === "list" ? (
-        <MeetingsTable meetings={meetings} />
-      ) : (
-        <MeetingsCalendar meetings={meetings} />
-      )}
+      <div data-tour-id="meetings-list">
+        {view === "list" ? (
+          <MeetingsTable meetings={meetings} />
+        ) : (
+          <MeetingsCalendar meetings={meetings} />
+        )}
+      </div>
     </div>
   );
 }

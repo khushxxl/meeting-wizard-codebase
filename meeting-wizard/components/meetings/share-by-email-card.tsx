@@ -16,10 +16,17 @@ interface Options {
   decisions: boolean;
 }
 
-export function ShareByEmailCard({ meetingTitle }: { meetingTitle: string }) {
+export function ShareByEmailCard({
+  meetingId,
+  meetingTitle,
+}: {
+  meetingId: string;
+  meetingTitle: string;
+}) {
   const [recipients, setRecipients] = useState("");
   const [note, setNote] = useState("");
   const [status, setStatus] = useState<Status>("idle");
+  const [errorMsg, setErrorMsg] = useState("");
   const [options, setOptions] = useState<Options>({
     summary: true,
     actionItems: true,
@@ -48,14 +55,32 @@ export function ShareByEmailCard({ meetingTitle }: { meetingTitle: string }) {
   async function handleSend() {
     if (!canSend) return;
     setStatus("sending");
-    // UI-only simulation
-    await new Promise((r) => setTimeout(r, 900));
-    setStatus("sent");
-    setTimeout(() => {
-      setStatus("idle");
-      setRecipients("");
-      setNote("");
-    }, 2200);
+    setErrorMsg("");
+
+    try {
+      const res = await fetch(`/api/meetings/${meetingId}/share`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipients: validEmails,
+          note,
+          options,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || `HTTP ${res.status}`);
+      }
+      setStatus("sent");
+      setTimeout(() => {
+        setStatus("idle");
+        setRecipients("");
+        setNote("");
+      }, 2400);
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : "Failed to send.");
+      setStatus("error");
+    }
   }
 
   return (
@@ -144,6 +169,10 @@ export function ShareByEmailCard({ meetingTitle }: { meetingTitle: string }) {
               </span>
             ))}
           </div>
+        )}
+
+        {status === "error" && errorMsg && (
+          <p className="text-[11px] text-destructive">{errorMsg}</p>
         )}
 
         <Button

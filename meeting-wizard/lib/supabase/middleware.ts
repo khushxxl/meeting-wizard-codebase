@@ -33,22 +33,24 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isAuthPage = request.nextUrl.pathname === "/";
-  const isAuthCallback = request.nextUrl.pathname.startsWith("/auth");
+  const pathname = request.nextUrl.pathname;
+  const isLanding = pathname === "/";
+  const isSignInPage = pathname === "/auth/signin";
+  const isAuthCallback = pathname.startsWith("/auth/callback");
   const isProtectedRoute =
-    request.nextUrl.pathname.startsWith("/dashboard") ||
-    request.nextUrl.pathname.startsWith("/meetings") ||
-    request.nextUrl.pathname.startsWith("/settings");
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/meetings") ||
+    pathname.startsWith("/settings");
 
   // Redirect unauthenticated users to sign-in
   if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone();
-    url.pathname = "/";
+    url.pathname = "/auth/signin";
     return NextResponse.redirect(url);
   }
 
-  // Redirect authenticated users away from landing page
-  if (user && isAuthPage && !isAuthCallback) {
+  // Redirect authenticated users away from landing or sign-in pages
+  if (user && (isLanding || isSignInPage) && !isAuthCallback) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
