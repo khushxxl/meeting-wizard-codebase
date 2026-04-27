@@ -54,6 +54,7 @@ export function MeetingDetailClient({
             <AudioPlayerCard
               src={audioSrc}
               fallbackDuration={meeting.duration_seconds}
+              meetingId={meeting.id}
             />
           )}
           {notes ? (
@@ -74,10 +75,10 @@ export function MeetingDetailClient({
                     <TabsTrigger value="keypoints">Key Points</TabsTrigger>
                   </TabsList>
                   <TabsContent value="summary">
-                    <SummaryTab summary={notes.summary} />
+                    <SummaryTab summary={notes.summary} meetingId={meeting.id} />
                   </TabsContent>
                   <TabsContent value="transcript">
-                    <TranscriptTab transcript={notes.transcript} />
+                    <TranscriptTab transcript={notes.transcript} meetingId={meeting.id} />
                   </TabsContent>
                   <TabsContent value="actions">
                     <ActionItemsTab items={notes.action_items} noteId={notes.id} />

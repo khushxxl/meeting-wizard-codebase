@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Read(//Users/khushaalchoithramani/.claude/**)",
+      "Bash(claude config:*)",
+      "Skill(update-config)",
+      "Skill(update-config:*)"
     ],
     "additionalDirectories": [
       "/Users/khushaalchoithramani/Desktop/work/meeting-wizard-codebase/meeting-wizard"

@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, Rewind, FastForward, Volume2, VolumeX } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 const SPEEDS = [0.75, 1, 1.25, 1.5, 2];
 
@@ -21,16 +23,32 @@ function formatTime(seconds: number) {
 export function AudioPlayerCard({
   src,
   fallbackDuration = 0,
+  meetingId,
 }: {
   src: string;
   fallbackDuration?: number;
+  meetingId?: string;
 }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(fallbackDuration);
   const probedRef = useRef(false);
+  const persistedRef = useRef(false);
+
+  async function persistDuration(seconds: number) {
+    if (!meetingId || persistedRef.current) return;
+    if (fallbackDuration && Math.abs(fallbackDuration - seconds) < 2) return;
+    persistedRef.current = true;
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("meetings")
+      .update({ duration_seconds: Math.round(seconds) })
+      .eq("id", meetingId);
+    if (!error) router.refresh();
+  }
   const [volume, setVolume] = useState(1);
   const [muted, setMuted] = useState(false);
   const [speed, setSpeed] = useState(1);
@@ -47,14 +65,14 @@ export function AudioPlayerCard({
       if (isFinite(audio.duration) && audio.duration > 0) {
         setDuration(audio.duration);
         probedRef.current = true;
+        persistDuration(audio.duration);
       } else if (!probedRef.current) {
         // MediaRecorder webm: duration is Infinity until we force a full scan.
-        // Seeking past the end makes the browser read the whole file and
-        // compute the real duration, which fires durationchange.
         probedRef.current = true;
         const onProbed = () => {
           if (isFinite(audio.duration) && audio.duration > 0) {
             setDuration(audio.duration);
+            persistDuration(audio.duration);
           }
           audio.currentTime = 0;
           audio.removeEventListener("durationchange", onProbed);

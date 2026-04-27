@@ -4,6 +4,7 @@ import { MeetingStatusBadge } from "./meeting-status-badge";
 import type { Meeting } from "@/lib/queries";
 import { format } from "date-fns";
 import { Calendar, Clock, Video } from "lucide-react";
+import { formatDuration } from "@/lib/utils";
 
 export function MeetingMetadataCard({ meeting }: { meeting: Meeting }) {
   return (
@@ -25,9 +26,7 @@ export function MeetingMetadataCard({ meeting }: { meeting: Meeting }) {
         </div>
         <div className="flex items-center gap-3">
           <Clock className="h-4 w-4 text-muted-foreground" />
-          <p className="text-sm">
-            {Math.round(meeting.duration_seconds / 60)} minutes
-          </p>
+          <p className="text-sm">{formatDuration(meeting.duration_seconds)}</p>
         </div>
         {meeting.google_meet_link && (
           <div className="flex items-center gap-3">

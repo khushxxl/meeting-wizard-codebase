@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   Upload,
   Link2,
@@ -41,9 +42,12 @@ export function BottomDock({
   const [errorMsg, setErrorMsg] = useState("");
   const [meetLink, setMeetLink] = useState("");
   const [aiQuery, setAiQuery] = useState("");
+  const [reviewOpen, setReviewOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [pendingChatMessage, setPendingChatMessage] = useState<string | null>(null);
+  const [pendingChatMessage, setPendingChatMessage] = useState<string | null>(
+    null,
+  );
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -72,7 +76,10 @@ export function BottomDock({
     setResult(null);
     setErrorMsg("");
     const reader = new FileReader();
-    reader.onload = (e) => setTranscript((e.target?.result as string) ?? "");
+    reader.onload = (e) => {
+      setTranscript((e.target?.result as string) ?? "");
+      setReviewOpen(true);
+    };
     reader.readAsText(f);
   }, []);
 
@@ -87,6 +94,7 @@ export function BottomDock({
 
   const handleProcess = async () => {
     if (!transcript.trim()) return;
+    setReviewOpen(false);
     setStatus("processing");
     setErrorMsg("");
 
@@ -118,7 +126,7 @@ export function BottomDock({
       const f = e.dataTransfer.files?.[0];
       if (f) handleFile(f);
     },
-    [handleFile]
+    [handleFile],
   );
 
   return (
@@ -198,23 +206,40 @@ export function BottomDock({
                   </div>
 
                   {transcript && status === "idle" && (
-                    <div className="rounded-lg border bg-muted/30 p-2.5 max-h-24 overflow-y-auto">
-                      <p className="text-xs text-muted-foreground font-mono whitespace-pre-wrap">
+                    <button
+                      type="button"
+                      onClick={() => setReviewOpen(true)}
+                      className="block w-full text-left rounded-lg border bg-muted/30 hover:bg-muted/60 p-2.5 max-h-24 overflow-hidden transition-colors"
+                    >
+                      <p className="text-xs text-muted-foreground font-mono whitespace-pre-wrap line-clamp-3">
                         {transcript.slice(0, 300)}
                         {transcript.length > 300 && "..."}
                       </p>
-                    </div>
+                      <p className="text-[11px] text-primary mt-1">
+                        Click to review & edit
+                      </p>
+                    </button>
                   )}
 
                   {status === "idle" && (
-                    <Button
-                      onClick={handleProcess}
-                      size="sm"
-                      className="w-full gap-2"
-                    >
-                      <Sparkles className="h-3.5 w-3.5" />
-                      Generate Notes with AI
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => setReviewOpen(true)}
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                      >
+                        Review
+                      </Button>
+                      <Button
+                        onClick={handleProcess}
+                        size="sm"
+                        className="flex-1 gap-2"
+                      >
+                        <Sparkles className="h-3.5 w-3.5" />
+                        Generate
+                      </Button>
+                    </div>
                   )}
 
                   {status === "processing" && (
@@ -240,7 +265,9 @@ export function BottomDock({
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 p-2.5 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800">
                         <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 shrink-0" />
-                        <p className="text-sm text-red-900 dark:text-red-200">{errorMsg}</p>
+                        <p className="text-sm text-red-900 dark:text-red-200">
+                          {errorMsg}
+                        </p>
                       </div>
                       <Button
                         onClick={handleProcess}
@@ -347,7 +374,8 @@ export function BottomDock({
                 className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               />
               <p className="text-xs text-muted-foreground text-center">
-                Press Enter to open chat. e.g. &quot;What were the action items from last week?&quot;
+                Press Enter to open chat. e.g. &quot;What were the action items
+                from last week?&quot;
               </p>
             </form>
           )}
@@ -388,7 +416,95 @@ export function BottomDock({
         pendingMessage={pendingChatMessage}
         onPendingConsumed={() => setPendingChatMessage(null)}
       />
+      <TranscriptReviewModal
+        open={reviewOpen}
+        transcript={transcript}
+        fileName={file?.name}
+        onChange={setTranscript}
+        onClose={() => setReviewOpen(false)}
+        onConfirm={handleProcess}
+      />
     </div>
+  );
+}
+
+function TranscriptReviewModal({
+  open,
+  transcript,
+  fileName,
+  onChange,
+  onClose,
+  onConfirm,
+}: {
+  open: boolean;
+  transcript: string;
+  fileName?: string;
+  onChange: (v: string) => void;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!open || !mounted) return null;
+  const wordCount = transcript.trim()
+    ? transcript.trim().split(/\s+/).length
+    : 0;
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-3xl bg-card border border-border rounded-2xl shadow-2xl flex flex-col max-h-[85vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between p-5 border-b border-border">
+          <div className="min-w-0">
+            <h3 className="font-serif text-xl tracking-tight">
+              Review transcript
+            </h3>
+            <p className="text-xs text-muted-foreground mt-0.5 truncate">
+              {fileName ? `${fileName} - ` : ""}
+              {wordCount.toLocaleString()} words. Edit before generating notes.
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="flex-1 overflow-hidden p-5">
+          <textarea
+            value={transcript}
+            onChange={(e) => onChange(e.target.value)}
+            spellCheck={false}
+            className="w-full h-[55vh] resize-none rounded-lg bg-background px-3 py-2 text-sm font-mono leading-relaxed border-0 outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            placeholder="Paste or edit your transcript here..."
+          />
+        </div>
+        <div className="flex items-center justify-end gap-2 p-4 border-t border-border">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="rounded-full"
+          >
+            Cancel
+          </Button>
+          <Button
+            size="sm"
+            onClick={onConfirm}
+            disabled={!transcript.trim()}
+            className="gap-2 rounded-full px-4 py-4"
+          >
+            Generate notes
+          </Button>
+        </div>
+      </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -411,13 +527,13 @@ function DockItem({
         "flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap",
         active
           ? "bg-primary text-primary-foreground"
-          : "text-muted-foreground hover:text-foreground hover:bg-accent"
+          : "text-muted-foreground hover:text-foreground hover:bg-accent",
       )}
     >
       <div
         className={cn(
           "h-7 w-7 rounded-lg flex items-center justify-center shrink-0",
-          active ? "bg-primary-foreground/20" : "bg-muted"
+          active ? "bg-primary-foreground/20" : "bg-muted",
         )}
       >
         <Icon className="h-3.5 w-3.5" />

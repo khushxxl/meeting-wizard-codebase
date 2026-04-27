@@ -15,6 +15,7 @@ import { MeetingFilters } from "./meeting-filters";
 import type { Meeting } from "@/lib/queries";
 import { format, isThisWeek, isThisMonth } from "date-fns";
 import { Users, ChevronRight } from "lucide-react";
+import { formatDuration } from "@/lib/utils";
 
 export function MeetingsTable({ meetings }: { meetings: Meeting[] }) {
   const [filter, setFilter] = useState("all");
@@ -88,7 +89,7 @@ export function MeetingsTable({ meetings }: { meetings: Meeting[] }) {
                     )}
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-muted-foreground text-sm">
-                    {Math.round(meeting.duration_seconds / 60)} min
+                    {formatDuration(meeting.duration_seconds)}
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
                     <span className="flex items-center gap-1 text-sm text-muted-foreground">

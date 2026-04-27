@@ -19,7 +19,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MeetingStatusBadge } from "./meeting-status-badge";
 import type { Meeting } from "@/lib/queries";
-import { cn } from "@/lib/utils";
+import { cn, formatDuration } from "@/lib/utils";
 
 export function MeetingsCalendar({ meetings }: { meetings: Meeting[] }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -177,7 +177,7 @@ export function MeetingsCalendar({ meetings }: { meetings: Meeting[] }) {
                     <p className="text-sm font-medium truncate">{m.title}</p>
                     <p className="text-xs text-muted-foreground">
                       {format(new Date(m.scheduled_at), "h:mm a")} ·{" "}
-                      {Math.round(m.duration_seconds / 60)} min ·{" "}
+                      {formatDuration(m.duration_seconds)} ·{" "}
                       {m.participants?.length ?? 0} participants
                     </p>
                   </div>

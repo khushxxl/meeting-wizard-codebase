@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Circle, Zap } from "lucide-react";
+import { CheckCircle2, Circle, Zap, Download } from "lucide-react";
 
 export default function LandingPage() {
   return (
@@ -59,7 +59,22 @@ export default function LandingPage() {
                   Sign in
                 </Button>
               </Link>
+              <a href="/described-extension.zip" download>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="text-base px-8 py-5 rounded-full bg-transparent border-white/25 text-white hover:bg-white/10 gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  Download extension
+                </Button>
+              </a>
             </div>
+            <p className="text-xs text-white/40">
+              Unzip, then load it via{" "}
+              <span className="font-mono">chrome://extensions</span> &rarr; Load
+              unpacked.
+            </p>
           </div>
         </main>
 
@@ -86,6 +101,34 @@ export default function LandingPage() {
                 <span>●</span>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ======= HOW TO USE DESCRIBED (video) ======= */}
+      <section className="relative min-h-screen flex items-center px-6 py-24 border-t border-white/10 overflow-hidden">
+        <div className="absolute top-1/2 -right-40 w-[500px] h-[500px] rounded-full bg-[#0D7FFF]/15 blur-[120px] pointer-events-none" />
+        <div className="relative z-10 max-w-5xl mx-auto w-full">
+          <div className="text-center mb-12">
+            <p className="text-xs uppercase tracking-[0.2em] text-white/50 mb-3">
+              Walkthrough
+            </p>
+            <h2 className="font-serif text-4xl sm:text-5xl tracking-tight text-white mb-4">
+              How to use Described
+            </h2>
+            <p className="text-white/60 max-w-xl mx-auto">
+              A tour of recording, transcribing, editing, and sharing meeting
+              notes.
+            </p>
+          </div>
+          <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-black shadow-2xl">
+            <video
+              controls
+              preload="metadata"
+              playsInline
+              className="w-full aspect-video"
+              src="https://pub-493fc4d6a8154323a65d213627b84bcf.r2.dev/described-tutorial.mp4"
+            />
           </div>
         </div>
       </section>
@@ -286,9 +329,6 @@ export default function LandingPage() {
                 Sign in
               </Button>
             </Link>
-            <span className="text-xs text-white/40">
-              No credit card required
-            </span>
           </div>
         </div>
       </section>

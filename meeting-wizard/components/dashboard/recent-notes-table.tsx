@@ -12,6 +12,7 @@ import { MeetingStatusBadge } from "@/components/meetings/meeting-status-badge";
 import type { Meeting } from "@/lib/queries";
 import { format } from "date-fns";
 import { FileText } from "lucide-react";
+import { formatDuration } from "@/lib/utils";
 
 export function RecentNotesTable({ meetings }: { meetings: Meeting[] }) {
   return (
@@ -56,7 +57,7 @@ export function RecentNotesTable({ meetings }: { meetings: Meeting[] }) {
                     {format(new Date(meeting.scheduled_at), "MMM d, yyyy")}
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-muted-foreground text-sm">
-                    {Math.round(meeting.duration_seconds / 60)} min
+                    {formatDuration(meeting.duration_seconds)}
                   </TableCell>
                   <TableCell className="hidden lg:table-cell text-muted-foreground text-sm">
                     {meeting.participants?.length ?? 0} people

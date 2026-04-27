@@ -52,16 +52,16 @@ const settingsSave = document.getElementById("settingsSave");
 const settingsMessage = document.getElementById("settingsMessage");
 const connectionStatus = document.getElementById("connectionStatus");
 
+const DEFAULT_SERVER_URL = "https://meeting-wizard.vercel.app";
+
 function normalizeUrl(url) {
   return (url || "").trim().replace(/\/+$/, "");
 }
 
 async function getConfig() {
-  const { serverUrl = "", apiKey = "" } = await chrome.storage.local.get([
-    "serverUrl",
-    "apiKey",
-  ]);
-  return { serverUrl: normalizeUrl(serverUrl), apiKey };
+  const { serverUrl = DEFAULT_SERVER_URL, apiKey = "" } =
+    await chrome.storage.local.get(["serverUrl", "apiKey"]);
+  return { serverUrl: normalizeUrl(serverUrl) || DEFAULT_SERVER_URL, apiKey };
 }
 
 async function renderConnectionStatus() {

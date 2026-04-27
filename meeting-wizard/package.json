@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "npm run zip:extension && next dev",
+    "build": "npm run zip:extension && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "zip:extension": "node scripts/zip-extension.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",
