@@ -75,7 +75,7 @@ async function handleStopRecording(sendResponse) {
     const duration = Math.round((Date.now() - recordingStartTime) / 1000);
     const now = new Date();
     const pad = (n) => String(n).padStart(2, "0");
-    const filename = `meeting-${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}-${pad(now.getHours())}-${pad(now.getMinutes())}.webm`;
+    const filename = `meeting-${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}-${pad(now.getHours())}-${pad(now.getMinutes())}.wav`;
 
     const response = await chrome.runtime.sendMessage({
       action: "offscreen-stop"

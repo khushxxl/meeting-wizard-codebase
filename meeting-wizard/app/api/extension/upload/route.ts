@@ -69,13 +69,20 @@ export async function POST(request: Request) {
     return json({ error: "Failed to create meeting" }, { status: 500 });
   }
 
-  const objectPath = `${auth.userId}/${meeting.id}.webm`;
+  // Pick extension from incoming MIME so storage matches the bytes.
+  const incomingType = file.type || "audio/wav";
+  const ext = incomingType.includes("wav")
+    ? "wav"
+    : incomingType.includes("webm")
+    ? "webm"
+    : "bin";
+  const objectPath = `${auth.userId}/${meeting.id}.${ext}`;
   const bytes = new Uint8Array(await file.arrayBuffer());
 
   const { error: uploadError } = await admin.storage
     .from("recordings")
     .upload(objectPath, bytes, {
-      contentType: file.type || "audio/webm",
+      contentType: incomingType,
       upsert: false,
     });
 
@@ -92,7 +99,7 @@ export async function POST(request: Request) {
 
   // Transcribe + structure. On failure, mark the meeting failed but keep the audio.
   try {
-    const transcript = await transcribeAudio(file, "recording.webm");
+    const transcript = await transcribeAudio(file, `recording.${ext}`);
     if (!transcript) throw new Error("Empty transcript");
 
     const notes = await structureTranscript(transcript);

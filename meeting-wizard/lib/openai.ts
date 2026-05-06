@@ -1,4 +1,8 @@
+import OpenAI from "openai";
+import { toFile } from "openai/uploads";
+
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY!;
+const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 const SYSTEM_PROMPT = `You are a meeting notes assistant. Given a meeting transcript, produce structured notes in JSON format.
 
@@ -91,26 +95,20 @@ export async function structureTranscript(
 
 export async function transcribeAudio(
   audio: Blob,
-  filename = "recording.webm"
+  filename = "recording.wav"
 ): Promise<string> {
-  const form = new FormData();
-  form.append("file", audio, filename);
-  form.append("model", "whisper-1");
-  form.append("response_format", "text");
+  const buf = Buffer.from(await audio.arrayBuffer());
+  const inferredType =
+    audio.type && audio.type.startsWith("audio/") ? audio.type : "audio/wav";
+  const file = await toFile(buf, filename, { type: inferredType });
 
-  const response = await fetch(
-    "https://api.openai.com/v1/audio/transcriptions",
-    {
-      method: "POST",
-      headers: { Authorization: `Bearer ${OPENAI_API_KEY}` },
-      body: form,
-    }
-  );
+  const result = await openai.audio.transcriptions.create({
+    file,
+    model: "whisper-1",
+    response_format: "text",
+  });
 
-  if (!response.ok) {
-    const err = await response.text();
-    throw new Error(`Whisper error: ${err}`);
-  }
-
-  return (await response.text()).trim();
+  // When response_format is "text", the SDK returns a string directly.
+  return typeof result === "string" ? result : (result as { text: string }).text;
 }
+
